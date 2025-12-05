@@ -1,14 +1,61 @@
-# Welcome to your CDK TypeScript project
+# Cute Cats Serverless App
 
-This is a blank project for CDK development with TypeScript.
+A simple serverless app to upload and view cat images.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## How It Works
 
-## Useful commands
+- React frontend uploads images (Base64)
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+- API Gateway routes requests
+
+- Lambda saves images to S3
+
+- Another Lambda lists them as presigned URLs
+
+- UI displays uploaded cats
+
+## Run Backend
+
+`npm install npm run build cdk deploy`
+
+## Run Frontend
+
+`npm install npm start`
+
+Upload cats → see them instantly.
+
+
+
+## Demo
+
+![](./assets/cute-cats.png)
+
+## Architecture Diagram
+
+                ┌──────────────────┐
+                │   React Frontend  │
+                │  (User uploads)   │
+                └───────┬──────────┘
+                        │ POST/GET
+                        ▼
+            ┌────────────────────────┐
+            │  Amazon API Gateway     │
+            │  /cats/upload           │
+            │  /cats                  │
+            └───────────┬────────────┘
+                        │ invokes
+             ┌──────────┴───────────────┐
+             │            AWS Lambda     │
+             │                            │
+     ┌────────────────────┐      ┌─────────────────────┐
+     │ UploadCatFunction   │      │ ListCatsFunction     │
+     │ Stores image in S3  │      │ Lists images &       │
+     │                     │      │ creates presigned URLs │
+     └─────────┬──────────┘      └──────────┬───────────┘
+               │ WRITE                      │ READ
+               ▼                             ▼
+         ┌─────────────────────────────────────────┐
+         │               Amazon S3                  │
+         │  Bucket: cute-cats-upload-{account}      │
+         │  Stores uploaded cat images              │
+         └─────────────────────────────────────────┘
