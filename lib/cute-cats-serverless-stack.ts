@@ -3,6 +3,8 @@ import { Construct } from 'constructs';
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { RestApi, LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
+
 
 export class CuteCatsServerlessStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -23,6 +25,17 @@ const uploadFunction = new NodejsFunction(this, "UploadCatFunction", {
 });
 
 catsBucket.grantPut(uploadFunction);
+
+const api = new RestApi(this, "CuteCatsApi", {
+  restApiName: "Cute Cats Service",
+});
+
+const uploadIntegration = new LambdaIntegration(uploadFunction);
+
+api.root
+  .addResource("cats")
+  .addResource("upload")
+  .addMethod("POST", uploadIntegration);
 
 
     
